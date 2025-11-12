@@ -1,0 +1,31 @@
+name: Deploy static files to s3 bucket
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  deploy_to_s3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install aws cli
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 2                        
+          verbose: false                    
+          arch: x86  
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Upload files to S3
+        run: |
+          aws s3 cp . s3://project2.monphyow.xyz/ —recursive
